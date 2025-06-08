@@ -3,12 +3,12 @@ import AppError from '../domain/AppError.js';
 import { InternalServerError } from '../domain/NonFunctionalError.js';
 
 export default class ErrorHandler {
-    static handle(error, req, res, next) {
+    static async handle(error, req, res, next) {
         let processedError = error;
 
         // Si no es un AppError, convertirlo
         if (!(error instanceof AppError)) {
-            processedError = ErrorHandler.convertToAppError(error);
+            processedError = await ErrorHandler.convertToAppError(error);
         }
 
         // Log del error con contexto
@@ -32,7 +32,7 @@ export default class ErrorHandler {
         res.status(processedError.statusCode || 500).json(response);
     }
 
-    static convertToAppError(error) {
+    static async convertToAppError(error) {
         // Errores de Prisma
         if (error.code === 'P2002') {
             const field = error.meta?.target?.[0] || 'field';
